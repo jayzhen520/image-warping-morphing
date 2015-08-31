@@ -31,6 +31,8 @@
 #include "ogldev_camera.h"
 #include "ogldev_texture.h"
 
+#include "mathOperation/mesh_matrix_producer.h"
+
 #define WINDOW_WIDTH  1280
 #define WINDOW_HEIGHT 1024
 
@@ -241,6 +243,9 @@ static void CompileShaders()
 
 int main(int argc, char** argv)
 {
+
+	mesh_matrix_producer("../Content/image-fbb.png", "../Content/image-lh.png");
+
 //    Magick::InitializeMagick(*argv);    
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
