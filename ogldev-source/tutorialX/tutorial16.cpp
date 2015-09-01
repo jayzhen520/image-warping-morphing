@@ -105,7 +105,11 @@ static void RenderSceneCB()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
     pTexture->Bind(GL_TEXTURE0);
 	pTexture2->Bind(GL_TEXTURE1);
-    glDrawElements(GL_TRIANGLES, vertexNum * 3, GL_UNSIGNED_INT, 0);
+	int indexfirst = 0;
+	for(int i = 0; i < triangleNum; i++){
+		indexfirst = i * 3;
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid *)(sizeof(unsigned int) * (indexfirst)));
+	}
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -269,7 +273,7 @@ int main(int argc, char** argv)
 		Vector3f * point = new Vector3f((mesh->pVerArr[i].x - 0.5) * 2, (mesh->pVerArr[i].y - 0.5) * 2, 0.0);
 		Vector2f * tex = new Vector2f(mesh->pVerArr[i].x, mesh->pVerArr[i].y);
 		vertices[i].setVertex(*point, *tex);
-
+		  
 		cout << "(" << point->x << ", " << point->y << ", " << point->z << ")" << ",(" << tex->x << ", " << tex->y << ")" << endl;
 
 	}
