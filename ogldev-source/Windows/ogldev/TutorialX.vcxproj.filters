@@ -18,6 +18,18 @@
     <ClCompile Include="..\..\tutorialX\tutorial16.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tutorialX\mathOperation\bmpLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tutorialX\mathOperation\common_structures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tutorialX\mathOperation\Matrices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tutorialX\mathOperation\mesh_matrix_producer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\tutorialX\shader.fs">
@@ -26,5 +38,22 @@
     <None Include="..\..\tutorialX\shader.vs">
       <Filter>Shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tutorialX\mathOperation\common_structures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tutorialX\mathOperation\Matrices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tutorialX\mathOperation\matrix_database.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tutorialX\mathOperation\Vectors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tutorialX\mathOperation\mesh_matrix_producer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

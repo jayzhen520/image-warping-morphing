@@ -11,11 +11,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\tutorialX\mathOperation\bmpLoader.cpp" />
+    <ClCompile Include="..\..\tutorialX\mathOperation\common_structures.cpp" />
+    <ClCompile Include="..\..\tutorialX\mathOperation\Matrices.cpp" />
+    <ClCompile Include="..\..\tutorialX\mathOperation\mesh_matrix_producer.cpp" />
     <ClCompile Include="..\..\tutorialX\tutorial16.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\tutorialX\shader.fs" />
     <None Include="..\..\tutorialX\shader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tutorialX\mathOperation\common_structures.h" />
+    <ClInclude Include="..\..\tutorialX\mathOperation\Matrices.h" />
+    <ClInclude Include="..\..\tutorialX\mathOperation\matrix_database.h" />
+    <ClInclude Include="..\..\tutorialX\mathOperation\mesh_matrix_producer.h" />
+    <ClInclude Include="..\..\tutorialX\mathOperation\Vectors.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{72663167-AE0B-4C61-A1FD-713347380608}</ProjectGuid>

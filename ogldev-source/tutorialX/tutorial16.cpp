@@ -17,6 +17,10 @@
 
     Tutorial 16 - Basic Texture Mapping
 */
+/*
+	z注意点：顶点多增加了三个，这是进行三角剖分的后遗症，其实可以使用一个指针，指向顶点索引为3的位置。
+	由三角剖分得到的图像是在0~1区间，应该映射到-1~1区间。
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -36,8 +40,9 @@
 #define WINDOW_WIDTH  1280
 #define WINDOW_HEIGHT 1024
 
-struct Vertex
+class Vertex
 {
+public:
     Vector3f m_pos;
     Vector2f m_tex;
 
@@ -48,6 +53,11 @@ struct Vertex
         m_pos = pos;
         m_tex = tex;
     }
+
+	void setVertex(Vector3f pos, Vector2f tex){
+		m_pos = pos;
+		m_tex = tex;
+	}
 };
 
 
@@ -64,6 +74,9 @@ PersProjInfo gPersProjInfo;
 const char* pVSFileName = "shader.vs";
 const char* pFSFileName = "shader.fs";
 
+int vertexNum;
+int triangleNum;
+
 static void RenderSceneCB()
 {
     pGameCamera->OnRender();
@@ -73,6 +86,8 @@ static void RenderSceneCB()
     static float Scale = 0.0f;
 
     Scale += 0.1f;
+	Scale += 0.1f;
+	Scale += 0.1f;
 
     Pipeline p;
     p.Rotate(0.0f, Scale, 0.0f);
@@ -89,7 +104,8 @@ static void RenderSceneCB()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
     pTexture->Bind(GL_TEXTURE0);
-    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+	pTexture2->Bind(GL_TEXTURE1);
+    glDrawElements(GL_TRIANGLES, vertexNum * 3, GL_UNSIGNED_INT, 0);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -130,34 +146,34 @@ static void InitializeGlutCallbacks()
 }
 
 
-static void CreateVertexBuffer()
+static void CreateVertexBuffer(Vertex * Vertices, int num)
 {
     //Vertex Vertices[4] = { Vertex(Vector3f(-1.0f, -1.0f, 0.5773f), Vector2f(0.0f, 0.0f)),
     //                       Vertex(Vector3f(0.0f, -1.0f, -1.15475f), Vector2f(0.5f, 0.0f)),
     //                       Vertex(Vector3f(1.0f, -1.0f, 0.5773f),  Vector2f(1.0f, 0.0f)),
     //                       Vertex(Vector3f(0.0f, 1.0f, 0.0f),      Vector2f(0.5f, 1.0f)) };
 
-	Vertex Vertices[4] = { Vertex(Vector3f(-1.0f, -1.0f, 0.0f), Vector2f(0.0f, 1.0f)),
-                        Vertex(Vector3f(1.0f, -1.0f, 0.0f), Vector2f(1.0f, 1.0f)),
-                        Vertex(Vector3f(1.0f, 1.0f, 0.0f),  Vector2f(1.0f, 0.0f)),
-                        Vertex(Vector3f(-1.0f, 1.0f, 0.0f),      Vector2f(0.0f, 0.0f)) };
+	//Vertex Vertices[4] = { Vertex(Vector3f(-1.0f, -1.0f, 0.0f), Vector2f(0.0f, 1.0f)),
+ //                       Vertex(Vector3f(1.0f, -1.0f, 0.0f), Vector2f(1.0f, 1.0f)),
+ //                       Vertex(Vector3f(1.0f, 1.0f, 0.0f),  Vector2f(1.0f, 0.0f)),
+ //                       Vertex(Vector3f(-1.0f, 1.0f, 0.0f),      Vector2f(0.0f, 0.0f)) };
     
  	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * num, Vertices, GL_STATIC_DRAW);
 }
 
 
-static void CreateIndexBuffer()
+static void CreateIndexBuffer(unsigned int * Indices, int num)
 {
-    unsigned int Indices[] = { 0, 3, 1,
-                               1, 3, 2,
-                               2, 3, 0,
-                               0, 1, 2 };
+    //unsigned int Indices[] = { 0, 3, 1,
+    //                           1, 3, 2,
+    //                           2, 3, 0,
+    //                           0, 1, 2 };
 
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * num, Indices, GL_STATIC_DRAW);
 }
 
 
@@ -244,7 +260,33 @@ static void CompileShaders()
 int main(int argc, char** argv)
 {
 
-	mesh_matrix_producer("../Content/image-fbb.png", "../Content/image-lh.png");
+	MESH_MATRIX * mm = mesh_matrix_producer("../Content/image-origin.txt", "../Content/image-target.txt");
+	vertexNum = mm->middleMesh->vertex_num + 3;
+	triangleNum = mm->middleMesh->triangle_num;
+	MESH * mesh = mm->middleMesh;
+	Vertex * vertices = new Vertex[vertexNum];
+	for(int i = 0; i < vertexNum; i++){
+		Vector3f * point = new Vector3f((mesh->pVerArr[i].x - 0.5) * 2, (mesh->pVerArr[i].y - 0.5) * 2, 0.0);
+		Vector2f * tex = new Vector2f(mesh->pVerArr[i].x, mesh->pVerArr[i].y);
+		vertices[i].setVertex(*point, *tex);
+
+		cout << "(" << point->x << ", " << point->y << ", " << point->z << ")" << ",(" << tex->x << ", " << tex->y << ")" << endl;
+
+	}
+
+
+	TRIANGLE * triangle_ptr = mesh->pTriArr;
+	unsigned int * indices = new unsigned int[triangleNum * 3];
+
+	int idx = 0;
+	for(int i = 0; i < triangleNum; i++){
+		indices[idx++] = triangle_ptr->i1;
+		indices[idx++] = triangle_ptr->i2;
+		indices[idx++] = triangle_ptr->i3;
+		triangle_ptr = triangle_ptr->pNext;
+
+		cout << indices[idx - 3] << ", " << indices[idx - 2] << ", " << indices[idx - 1] << endl;
+	}
 
 //    Magick::InitializeMagick(*argv);    
     glutInit(&argc, argv);
@@ -267,12 +309,12 @@ int main(int argc, char** argv)
     }
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
 
-    CreateVertexBuffer();
-    CreateIndexBuffer();
+    CreateVertexBuffer(vertices, vertexNum);
+    CreateIndexBuffer(indices, triangleNum * 3);
 
     CompileShaders();
 
@@ -288,8 +330,8 @@ int main(int argc, char** argv)
         return 1;
     }
 	
-	pTexture->Bind(GL_TEXTURE0);
-	pTexture2->Bind(GL_TEXTURE1);
+	//pTexture->Bind(GL_TEXTURE0);
+	//pTexture2->Bind(GL_TEXTURE1);
  
     gPersProjInfo.FOV = 60.0f;
     gPersProjInfo.Height = WINDOW_HEIGHT;

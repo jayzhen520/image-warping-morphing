@@ -51,8 +51,8 @@ void RemoveTriangleNode(MESH_PTR pMesh, TRIANGLE * pTri);
 TRIANGLE * AddTriangleNode(MESH_PTR pMesh, TRIANGLE * pPrevTri, int i1, int i2, int i3);
 
 // I/O functions
-void Input(char* pFile, MESH_PTR pMesh);
-void Output(char* pFile, MESH_PTR pMesh);
+void Input(const char* pFile, MESH_PTR pMesh);
+void Output(const char* pFile, MESH_PTR pMesh);
 
 // GLOBALS ////////////////////////////////////////////////
 
