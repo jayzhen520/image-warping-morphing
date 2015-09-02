@@ -37,8 +37,8 @@
 
 #include "mathOperation/mesh_matrix_producer.h"
 
-#define WINDOW_WIDTH  1280
-#define WINDOW_HEIGHT 1024
+#define WINDOW_WIDTH  500
+#define WINDOW_HEIGHT 500
 
 class Vertex
 {
@@ -66,13 +66,20 @@ GLuint IBO;
 GLuint gWVPLocation;
 GLuint gSampler;
 GLuint gSampler2;
+GLuint originMatrix;
+GLuint targetMatrix;
+GLuint originWeight;
 Texture* pTexture = NULL;
 Texture * pTexture2 = NULL;
 Camera* pGameCamera = NULL;
 PersProjInfo gPersProjInfo;
 
+MESH_MATRIX * mesh_matrix = NULL;
+
 const char* pVSFileName = "shader.vs";
 const char* pFSFileName = "shader.fs";
+
+const float originWeightValue = 0.0;
 
 int vertexNum;
 int triangleNum;
@@ -107,6 +114,8 @@ static void RenderSceneCB()
 	pTexture2->Bind(GL_TEXTURE1);
 	int indexfirst = 0;
 	for(int i = 0; i < triangleNum; i++){
+		glUniformMatrix3fv(originMatrix, 1, GL_FALSE, mesh_matrix->triangle_matrix[i].originTransMatrix.get());
+		glUniformMatrix3fv(targetMatrix, 1, GL_FALSE, mesh_matrix->triangle_matrix[i].targetTransMatrix.get());
 		indexfirst = i * 3;
 		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid *)(sizeof(unsigned int) * (indexfirst)));
 	}
@@ -253,9 +262,12 @@ static void CompileShaders()
     glUseProgram(ShaderProgram);
 
     gWVPLocation = glGetUniformLocation(ShaderProgram, "gWVP");
-    assert(gWVPLocation != 0xFFFFFFFF);
+    //assert(gWVPLocation != 0xFFFFFFFF);
     gSampler = glGetUniformLocation(ShaderProgram, "gSampler");
 	gSampler2 = glGetUniformLocation(ShaderProgram, "gSampler2");
+	originMatrix = glGetUniformLocation(ShaderProgram, "originMatrix");
+	targetMatrix = glGetUniformLocation(ShaderProgram, "targetMatrix");
+	originWeight = glGetUniformLocation(ShaderProgram, "originWeight");
  //   assert(gSampler != 0xFFFFFFFF);
 	//assert(gSampler != 0xFFFFFFFF);
 }
@@ -264,7 +276,8 @@ static void CompileShaders()
 int main(int argc, char** argv)
 {
 
-	MESH_MATRIX * mm = mesh_matrix_producer("../Content/image-origin.txt", "../Content/image-target.txt");
+	MESH_MATRIX * mm = mesh_matrix_producer("../Content/image-origin.txt", "../Content/image-target.txt", originWeightValue);
+	mesh_matrix = mm;
 	vertexNum = mm->middleMesh->vertex_num + 3;
 	triangleNum = mm->middleMesh->triangle_num;
 	MESH * mesh = mm->middleMesh;
@@ -277,7 +290,6 @@ int main(int argc, char** argv)
 		cout << "(" << point->x << ", " << point->y << ", " << point->z << ")" << ",(" << tex->x << ", " << tex->y << ")" << endl;
 
 	}
-
 
 	TRIANGLE * triangle_ptr = mesh->pTriArr;
 	unsigned int * indices = new unsigned int[triangleNum * 3];
@@ -324,6 +336,7 @@ int main(int argc, char** argv)
 
     glUniform1i(gSampler, 0);
 	glUniform1i(gSampler2, 1);
+	glUniform1f(originWeight, originWeightValue);
 
     pTexture = new Texture(GL_TEXTURE_2D, "../Content/image-fbb.png");
 	pTexture2 = new Texture(GL_TEXTURE_2D, "../Content/image-lh.png");

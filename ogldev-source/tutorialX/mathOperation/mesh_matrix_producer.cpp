@@ -69,7 +69,7 @@ void meshTriangleNumCount(MESH * const mesh);
 
 
 // FUNCTIONS //////////////////////////////////////////////
-MESH_MATRIX * mesh_matrix_producer(const char * originPath, const char * targetPath)
+MESH_MATRIX * mesh_matrix_producer(const char * originPath, const char * targetPath, const float originWeight)
 {
 
 	//if(argc!=3)
@@ -115,7 +115,7 @@ MESH_MATRIX * mesh_matrix_producer(const char * originPath, const char * targetP
 	meshTriangleNumCount(&targetMesh);
 
 	//生成TRIANGLE_MATRIX矩阵组，用于顶点查询出使用哪组（2个）矩阵
-	MESH_MATRIX * mesh_matrix = triangleMatrixCreate(&originMesh, &targetMesh, 0.9);
+	MESH_MATRIX * mesh_matrix = triangleMatrixCreate(&originMesh, &targetMesh, originWeight);
 
 	
 
@@ -134,9 +134,10 @@ void meshTriangleNumCount(MESH * const mesh){
 
 MESH_MATRIX * triangleMatrixCreate(MESH * originMesh, MESH * targetMesh, float originWeight){
 	//构建中间mesh
-	MESH * mMesh = middleMeshCreate(originMesh, targetMesh, 0.9);
+	MESH * mMesh = middleMeshCreate(originMesh, targetMesh, originWeight);
 	//构建origin,middle,target矩阵
 	Matrix3 * middleMatrix3 = new Matrix3[mMesh->triangle_num];
+	Matrix3 * middleMatrix3_2 = new Matrix3[mMesh->triangle_num];
 	Matrix3 * originMatrix3 = new Matrix3[originMesh->triangle_num];
 	Matrix3 * targetMatrix3 = new Matrix3[targetMesh->triangle_num];
 	
@@ -149,41 +150,44 @@ MESH_MATRIX * triangleMatrixCreate(MESH * originMesh, MESH * targetMesh, float o
 		point[0] = mMesh->pVerArr[middleTrianglePTR->i1].x;
 		point[1] = mMesh->pVerArr[middleTrianglePTR->i1].y;
 		point[2] = 1;
-		middleMatrix3[i].setColumn(0, point);
+		middleMatrix3[i].setRow(0, point);
+		middleMatrix3_2[i].setRow(0, point);
 		point[0] = mMesh->pVerArr[middleTrianglePTR->i2].x;
 		point[1] = mMesh->pVerArr[middleTrianglePTR->i2].y;
 		point[2] = 1;
-		middleMatrix3[i].setColumn(1, point);
+		middleMatrix3[i].setRow(1, point);
+		middleMatrix3_2[i].setRow(1, point);
 		point[0] = mMesh->pVerArr[middleTrianglePTR->i3].x;
 		point[1] = mMesh->pVerArr[middleTrianglePTR->i3].y;
 		point[2] = 1;
-		middleMatrix3[i].setColumn(2, point);
+		middleMatrix3[i].setRow(2, point);
+		middleMatrix3_2[i].setRow(2, point);
 
 		point[0] = originMesh->pVerArr[originTrianglePTR->i1].x;
 		point[1] = originMesh->pVerArr[originTrianglePTR->i1].y;
 		point[2] = 1;
-		originMatrix3[i].setColumn(0, point);
+		originMatrix3[i].setRow(0, point);
 		point[0] = originMesh->pVerArr[originTrianglePTR->i2].x;
 		point[1] = originMesh->pVerArr[originTrianglePTR->i2].y;
 		point[2] = 1;
-		originMatrix3[i].setColumn(1, point);
+		originMatrix3[i].setRow(1, point);
 		point[0] = originMesh->pVerArr[originTrianglePTR->i3].x;
 		point[1] = originMesh->pVerArr[originTrianglePTR->i3].y;
 		point[2] = 1;
-		originMatrix3[i].setColumn(2, point);
+		originMatrix3[i].setRow(2, point);
 
-		point[0] = targetMesh->pVerArr[targetTrianglePTR->i1].x;
-		point[1] = targetMesh->pVerArr[targetTrianglePTR->i1].y;
+		point[0] = targetMesh->pVerArr[originTrianglePTR->i1].x;
+		point[1] = targetMesh->pVerArr[originTrianglePTR->i1].y;
 		point[2] = 1;
-		targetMatrix3[i].setColumn(0, point);
-		point[0] = targetMesh->pVerArr[targetTrianglePTR->i2].x;
-		point[1] = targetMesh->pVerArr[targetTrianglePTR->i2].y;
+		targetMatrix3[i].setRow(0, point);
+		point[0] = targetMesh->pVerArr[originTrianglePTR->i2].x;
+		point[1] = targetMesh->pVerArr[originTrianglePTR->i2].y;
 		point[2] = 1;
-		targetMatrix3[i].setColumn(1, point);
-		point[0] = targetMesh->pVerArr[targetTrianglePTR->i3].x;
-		point[1] = targetMesh->pVerArr[targetTrianglePTR->i3].y;
+		targetMatrix3[i].setRow(1, point);
+		point[0] = targetMesh->pVerArr[originTrianglePTR->i3].x;
+		point[1] = targetMesh->pVerArr[originTrianglePTR->i3].y;
 		point[2] = 1;
-		targetMatrix3[i].setColumn(2, point);
+		targetMatrix3[i].setRow(2, point);
 
 		middleTrianglePTR = middleTrianglePTR->pNext;
 		originTrianglePTR = originTrianglePTR->pNext;
@@ -195,8 +199,8 @@ MESH_MATRIX * triangleMatrixCreate(MESH * originMesh, MESH * targetMesh, float o
 	mesh_matrix_ptr->triangle_matrix = new TRIANGLE_MATRIX[mMesh->triangle_num];
 	for(int i = 0; i < mMesh->triangle_num; i++){
 		mesh_matrix_ptr->triangle_matrix[i].index = i;
-		mesh_matrix_ptr->triangle_matrix[i].originTransMatrix = originMatrix3[i] * middleMatrix3[i].invert();
-		mesh_matrix_ptr->triangle_matrix[i].targetTransMatrix = targetMatrix3[i] * middleMatrix3[i].invert();
+		mesh_matrix_ptr->triangle_matrix[i].originTransMatrix = middleMatrix3[i].invert() * originMatrix3[i];
+		mesh_matrix_ptr->triangle_matrix[i].targetTransMatrix = middleMatrix3_2[i].invert() * targetMatrix3[i];
 	}
 	return mesh_matrix_ptr;
 }
