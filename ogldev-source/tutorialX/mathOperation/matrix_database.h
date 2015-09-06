@@ -10,7 +10,7 @@ private:
 	MESH * originMesh;
 	MESH * targetMesh;
 	MESH * middleMesh;
-	TRIANGLE_MATRIX_PAIR * triangle_matrix_pair;
+	TRIANGLE_MATRIX * triangle_matrix_pair;
 public:
 	MatrixDatabase();
 	~MatrixDatabase();

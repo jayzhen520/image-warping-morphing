@@ -30,6 +30,9 @@
     <ClCompile Include="..\..\tutorialX\mathOperation\mesh_matrix_producer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tutorialX\mathOperation\jsonParse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\tutorialX\shader.fs">

@@ -3,6 +3,7 @@
 
 #include "common_structures.h"
 
-MESH_MATRIX * mesh_matrix_producer(const char * originPath, const char * targetPath, const float originWeight);
+void mesh_init(const char * originPath, const char * targetPath, MESH * originMesh, MESH * targetMesh);
+MESH_MATRIX * middle_mesh_matrix_producer(MESH * originMesh, MESH * targetMesh, const float originWeight);
 
 #endif

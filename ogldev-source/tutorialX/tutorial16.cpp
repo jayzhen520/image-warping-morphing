@@ -74,18 +74,28 @@ Texture * pTexture2 = NULL;
 Camera* pGameCamera = NULL;
 PersProjInfo gPersProjInfo;
 
+MESH * originMesh;
+MESH * targetMesh;
+
 MESH_MATRIX * mesh_matrix = NULL;
 
 const char* pVSFileName = "shader.vs";
 const char* pFSFileName = "shader.fs";
 
-const float originWeightValue = 0.0;
+float originWeightValue = 0.0;
 
 int vertexNum;
 int triangleNum;
 
+void mesh_compute(MESH * originMesh, MESH * targetMesh, const float originWeight);
+
 static void RenderSceneCB()
 {
+	originWeightValue += 0.01f;
+	if(originWeightValue >= 1.0)
+		originWeightValue = 0.0;
+	mesh_compute(originMesh, targetMesh, originWeightValue);
+
     pGameCamera->OnRender();
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -103,6 +113,7 @@ static void RenderSceneCB()
     p.SetPerspectiveProj(gPersProjInfo);
 
     glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, (const GLfloat*)p.GetWVPTrans());
+	glUniform1f(originWeight, originWeightValue);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -122,6 +133,9 @@ static void RenderSceneCB()
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+
+	delete mesh_matrix;
+	mesh_matrix = NULL;
 
     glutSwapBuffers();
 }
@@ -272,11 +286,8 @@ static void CompileShaders()
 	//assert(gSampler != 0xFFFFFFFF);
 }
 
-
-int main(int argc, char** argv)
-{
-
-	MESH_MATRIX * mm = mesh_matrix_producer("../Content/image-origin.txt", "../Content/image-target.txt", originWeightValue);
+void mesh_compute(MESH * originMesh, MESH * targetMesh, const float originWeight){
+	MESH_MATRIX * mm = middle_mesh_matrix_producer(originMesh, targetMesh, originWeight);
 	mesh_matrix = mm;
 	vertexNum = mm->middleMesh->vertex_num + 3;
 	triangleNum = mm->middleMesh->triangle_num;
@@ -304,6 +315,24 @@ int main(int argc, char** argv)
 		cout << indices[idx - 3] << ", " << indices[idx - 2] << ", " << indices[idx - 1] << endl;
 	}
 
+	CreateVertexBuffer(vertices, vertexNum);
+    CreateIndexBuffer(indices, triangleNum * 3);
+
+	delete [] vertices;
+	delete [] indices;
+}
+
+
+int main(int argc, char** argv)
+{
+	originMesh = new MESH();
+	targetMesh = new MESH();
+
+	char * originPath = "../Content/image-origin.txt";
+	char * targetPath = "../Content/image-target.txt";
+
+	mesh_init(originPath, targetPath, originMesh, targetMesh);
+
 //    Magick::InitializeMagick(*argv);    
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
@@ -329,14 +358,14 @@ int main(int argc, char** argv)
     glCullFace(GL_BACK);
     //glEnable(GL_CULL_FACE);
 
-    CreateVertexBuffer(vertices, vertexNum);
-    CreateIndexBuffer(indices, triangleNum * 3);
+    //CreateVertexBuffer(vertices, vertexNum);
+    //CreateIndexBuffer(indices, triangleNum * 3);
 
     CompileShaders();
 
     glUniform1i(gSampler, 0);
 	glUniform1i(gSampler2, 1);
-	glUniform1f(originWeight, originWeightValue);
+	
 
     pTexture = new Texture(GL_TEXTURE_2D, "../Content/image-fbb.png");
 	pTexture2 = new Texture(GL_TEXTURE_2D, "../Content/image-lh.png");

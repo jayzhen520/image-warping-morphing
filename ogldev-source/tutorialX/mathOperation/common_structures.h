@@ -10,32 +10,23 @@
 #endif
 
 // TYPES //////////////////////////////////////////////////
-typedef struct VERTEX2D_TYP
+class VERTEX2D
 {
+public:
+	VERTEX2D();
+	VERTEX2D(REAL x, REAL y);
 	REAL x;
 	REAL y;
 
-} VERTEX2D, *VERTEX2D_PTR;
+};
 
-typedef struct EDGE_TYP
+class EDGE
 {
+public:
+	EDGE();
 	VERTEX2D v1;
 	VERTEX2D v2;
-
-} EDGE, *EDGE_PTR;
-
-//typedef struct TRIANGLE_TYP
-//{
-//	int i1; // vertex index
-//	int i2; 
-//	int i3; 
-//
-//	TRIANGLE_TYP* pNext;
-//	TRIANGLE_TYP* pPrev;
-//
-//
-//
-//} TRIANGLE, *TRIANGLE_PTR;
+};
 
 class TRIANGLE
 {
@@ -50,32 +41,44 @@ public:
 	~TRIANGLE();
 };
 
-typedef struct MESH_TYP
+class MESH
 {
+public:
 	int vertex_num;
 	int triangle_num;
 
-	VERTEX2D_PTR pVerArr; // point to outer vertices arrary
+	VERTEX2D * pVerArr; // point to outer vertices arrary
 	TRIANGLE * pTriArr; // point to outer triangles arrary
-
-} MESH, *MESH_PTR;
+public:
+	MESH(int vertexNum, int triangleNum);
+	MESH();
+	~MESH();
+};
 
 //每一个三角形对应一组（两个）矩阵
-typedef struct TRIANGLE_MATRIX_PAIR
+class TRIANGLE_MATRIX
 {
+public:
 	//三角形的索引
 	unsigned short index;
 	//此三角形对应的变换矩阵
 	Matrix3 originTransMatrix;
 	Matrix3 targetTransMatrix;
-} TRIANGLE_MATRIX, *TRIANGLE_MATRIX_PTR;
 
-typedef struct MESH_MATRIX_TYP
+
+
+};
+
+class MESH_MATRIX
 {
+public:
 	MESH * middleMesh;
 	
 	TRIANGLE_MATRIX * triangle_matrix;
-
-}MESH_MATRIX, MESH_MATRIX_PTR;
+public:
+	MESH_MATRIX();
+	~MESH_MATRIX();
+	
+};
 
 #endif
